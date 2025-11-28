@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact | Expense Tracker</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="header-top">
+        <div class="brand">
+          <div class="brand-mark">PP</div>
+          <div class="brand-copy">
+            <span class="brand-label">PrimePath</span>
+            <strong>Expense Tracker</strong>
+          </div>
+        </div>
+        <div class="header-meta">
+          <p class="header-date" id="currentDate"></p>
+        </div>
+      </div>
+      <nav class="primary-nav">
+        <a class="nav-item" href="index.html">Back to App</a>
+        <span class="nav-item active">Reach Us</span>
+      </nav>
+    </header>
+
+    <main class="app-main contact-page">
+      <section class="contact-section">
+        <div class="contact-card">
+          <h2>Reach Us</h2>
+          <p>Have questions or need support? Send us a quick note.</p>
+          <form id="contactForm" class="contact-form">
+            <label>
+              Full Name
+              <input type="text" id="contactName" required />
+            </label>
+            <label>
+              Email ID
+              <input type="email" id="contactEmail" required />
+            </label>
+            <label>
+              Contact Number
+              <input type="tel" id="contactPhone" required />
+            </label>
+            <label>
+              Purpose
+              <textarea id="contactPurpose" required></textarea>
+            </label>
+            <button type="submit">Send Message</button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <script src="contact.js"></script>
+  </body>
+</html>
+

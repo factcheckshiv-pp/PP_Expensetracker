@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Expense Tracker</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="header-top">
+        <div class="brand">
+          <div class="brand-mark">PP</div>
+          <div class="brand-copy">
+            <span class="brand-label">PrimePath</span>
+            <strong>Expense Tracker</strong>
+          </div>
+        </div>
+        <div class="header-meta">
+          <p class="header-date" id="currentDate"></p>
+          <div class="user-status">
+            <span id="userGreeting">Guest</span>
+            <button id="changePasswordBtn" class="text-btn" type="button">Change Password</button>
+            <button id="logoutBtn" class="logout-btn" type="button">Log out</button>
+          </div>
+        </div>
+      </div>
+      <nav class="primary-nav" id="primaryNav">
+        <button data-target="dashboardSection" class="nav-item active">Dashboard</button>
+        <button data-target="expenseSection" class="nav-item">Add Expenses</button>
+        <button data-target="categorySection" class="nav-item">Manage Categories</button>
+        <button data-target="reportSection" class="nav-item">Generate PDF</button>
+        <a id="contactLink" class="nav-item hidden" href="contact.html" target="_blank" rel="noopener"
+          >Contact Form</a
+        >
+      </nav>
+    </header>
+
+    <section class="auth-panel" id="authPanel">
+      <div class="auth-card">
+        <h2>Log In</h2>
+        <form id="loginForm">
+          <label>
+            Email / Username
+            <input type="text" id="loginEmail" required />
+          </label>
+          <label>
+            Password
+            <input type="password" id="loginPassword" required />
+          </label>
+          <button type="submit">Log In</button>
+        </form>
+        <p class="auth-note">
+          Need an account?
+          <button id="showSignupBtn" class="link-btn" type="button">Sign up</button>
+        </p>
+      </div>
+    </section>
+
+    <main class="app-main">
+      <section id="dashboardSection" class="dashboard-section">
+        <h2>Dashboard</h2>
+        <div class="dashboard">
+          <div class="card">
+            <h3>Current Month Total</h3>
+            <p id="monthTotal">€0.00</p>
+          </div>
+          <div class="card">
+            <h3>Category Filter</h3>
+            <select id="dashboardCategoryFilter"></select>
+            <p class="card-total" id="categoryTotal">€0.00</p>
+          </div>
+          <div class="card">
+            <h3>Entries Count</h3>
+            <p id="entryCount">0</p>
+          </div>
+        </div>
+        <div class="chart-row">
+          <div class="card chart-card">
+            <div class="chart-header">
+              <h3>Monthly Breakdown</h3>
+            </div>
+            <canvas id="expenseChart" width="800" height="320"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <section id="expenseSection" class="panel hidden">
+        <h2>Add Expense</h2>
+        <form id="expenseForm" class="expense-entry">
+          <label>
+            Category
+            <select id="expenseCategory"></select>
+          </label>
+          <label>
+            Description
+            <input type="text" id="expenseDescription" required />
+          </label>
+          <label>
+            Amount (€)
+            <input type="number" min="0" step="0.01" id="expenseAmount" required />
+          </label>
+          <button type="submit">Save Expense</button>
+        </form>
+
+        <div class="expense-table-section">
+          <div class="section-header">
+            <h3>All Expenses</h3>
+            <select id="tableCategoryFilter"></select>
+          </div>
+          <table id="expenseTable">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Amount (€)</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="categorySection" class="panel hidden">
+        <h2>Manage Categories</h2>
+        <form id="categoryForm" class="category-form">
+          <label>
+            Category name
+            <input type="text" id="newCategoryName" placeholder="Enter category name" required />
+          </label>
+          <button type="submit">Add Category</button>
+        </form>
+        <ul id="categoryList" class="category-list"></ul>
+      </section>
+
+      <section id="reportSection" class="panel hidden">
+        <h2>Generate Expense Report</h2>
+        <form id="reportForm" class="report-form">
+          <label>
+            Category
+            <select id="reportCategory"></select>
+          </label>
+          <label>
+            Start Date
+            <input type="date" id="reportStart" required />
+          </label>
+          <label>
+            End Date
+            <input type="date" id="reportEnd" required />
+          </label>
+          <button type="submit">Download PDF</button>
+        </form>
+      </section>
+
+      <section id="contactLogSection" class="panel hidden">
+        <h2>Contact Requests</h2>
+        <table id="contactTable">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Contact Number</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+    </main>
+
+    <div class="modal hidden" id="signupModal">
+      <div class="modal-overlay" data-close-modal="signupModal"></div>
+      <div class="modal-content">
+        <button class="modal-close" data-close-modal="signupModal" type="button">×</button>
+        <h2>Create Account</h2>
+        <form id="signupForm">
+          <label>
+            Name
+            <input type="text" id="signupName" required />
+          </label>
+          <label>
+            Email / Username
+            <input type="text" id="signupEmail" required />
+          </label>
+          <label>
+            Password
+            <input type="password" id="signupPassword" required />
+          </label>
+          <button type="submit">Sign Up</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal hidden" id="passwordModal">
+      <div class="modal-overlay" data-close-modal="passwordModal"></div>
+      <div class="modal-content">
+        <button class="modal-close" data-close-modal="passwordModal" type="button">×</button>
+        <h2>Change Password</h2>
+        <form id="passwordForm">
+          <label>
+            Current Password
+            <input type="password" id="currentPassword" required />
+          </label>
+          <label>
+            New Password
+            <input type="password" id="newPassword" required />
+          </label>
+          <label>
+            Confirm Password
+            <input type="password" id="confirmPassword" required />
+          </label>
+          <button type="submit">Update Password</button>
+        </form>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
+
