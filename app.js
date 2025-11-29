@@ -6,6 +6,9 @@ const formatEuro = (value) =>
 
 const DEFAULT_CATEGORY = "Uncategorized";
 const CONTACT_STORAGE_KEY = "contactMessages";
+const USERS_STORAGE_KEY = "expenseTrackerUsers";
+const CATEGORIES_STORAGE_KEY = "expenseTrackerCategories";
+const CURRENT_USER_STORAGE_KEY = "expenseTrackerCurrentUser";
 const initialCategories = [
   DEFAULT_CATEGORY,
   "Housing",
@@ -14,15 +17,72 @@ const initialCategories = [
   "Utilities",
   "Entertainment",
 ];
-let categories = [...initialCategories];
-const users = {
-  admin: {
-    name: "Administrator",
-    password: "nimda",
-    expenses: [],
-  },
-};
-let currentUser = null;
+
+function loadUsers() {
+  try {
+    const raw = localStorage.getItem(USERS_STORAGE_KEY);
+    if (raw) {
+      const loaded = JSON.parse(raw);
+      // Ensure admin user always exists
+      if (!loaded.admin) {
+        loaded.admin = {
+          name: "Administrator",
+          password: "nimda",
+          expenses: [],
+        };
+      }
+      return loaded;
+    }
+  } catch {}
+  return {
+    admin: {
+      name: "Administrator",
+      password: "nimda",
+      expenses: [],
+    },
+  };
+}
+
+function saveUsers(usersData) {
+  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(usersData));
+}
+
+function loadCategories() {
+  try {
+    const raw = localStorage.getItem(CATEGORIES_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch {}
+  return [...initialCategories];
+}
+
+function saveCategories(cats) {
+  localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(cats));
+}
+
+function loadCurrentUser() {
+  try {
+    return localStorage.getItem(CURRENT_USER_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function saveCurrentUser(user) {
+  if (user) {
+    localStorage.setItem(CURRENT_USER_STORAGE_KEY, user);
+  } else {
+    localStorage.removeItem(CURRENT_USER_STORAGE_KEY);
+  }
+}
+
+let categories = loadCategories();
+let users = loadUsers();
+let currentUser = loadCurrentUser();
 let editingExpenseId = null;
 let editingCategory = null;
 let expenseChart = null;
@@ -99,7 +159,6 @@ function init() {
   renderCategoryList();
   renderExpenses();
   updateDashboard();
-  renderContactLog();
   updateAccessState();
   attachEvents();
 }
@@ -132,6 +191,7 @@ function attachEvents() {
     const name = elements.newCategoryInput.value.trim();
     if (!name || categories.some((c) => c.toLowerCase() === name.toLowerCase())) return;
     categories.push(name);
+    saveCategories(categories);
     elements.newCategoryInput.value = "";
     renderCategoryOptions();
     renderCategoryList();
@@ -166,7 +226,9 @@ function handleSignup(event) {
   }
 
   users[email] = { name, password, expenses: [] };
+  saveUsers(users);
   currentUser = email;
+  saveCurrentUser(currentUser);
   elements.signupForm.reset();
   closeModal("signupModal");
   updateAccessState();
@@ -189,6 +251,7 @@ function handleLogin(event) {
     return;
   }
   currentUser = email;
+  saveCurrentUser(currentUser);
   elements.loginForm.reset();
   updateAccessState();
   renderExpenses();
@@ -197,6 +260,7 @@ function handleLogin(event) {
 
 function handleLogout() {
   currentUser = null;
+  saveCurrentUser(null);
   editingExpenseId = null;
   updateAccessState();
   renderExpenses();
@@ -219,6 +283,7 @@ function handlePasswordChange(event) {
     return;
   }
   user.password = next;
+  saveUsers(users);
   elements.passwordForm.reset();
   closeModal("passwordModal");
   alert("Password updated.");
@@ -275,6 +340,7 @@ function setUserExpenses(updater) {
   if (!currentUser) return;
   const current = users[currentUser].expenses;
   users[currentUser].expenses = typeof updater === "function" ? updater(current) : updater;
+  saveUsers(users);
 }
 
 function renderCategoryOptions() {
@@ -386,11 +452,13 @@ function saveCategoryEdit(oldName, newName) {
   }
 
   categories = categories.map((category) => (category === oldName ? trimmed : category));
+  saveCategories(categories);
   Object.values(users).forEach((user) => {
     user.expenses = user.expenses.map((expense) =>
       expense.category === oldName ? { ...expense, category: trimmed } : expense,
     );
   });
+  saveUsers(users);
   editingCategory = null;
   renderCategoryOptions();
   renderCategoryList();
@@ -404,11 +472,13 @@ function removeCategory(name) {
   if (!categories.includes(DEFAULT_CATEGORY)) {
     categories.unshift(DEFAULT_CATEGORY);
   }
+  saveCategories(categories);
   Object.values(users).forEach((user) => {
     user.expenses = user.expenses.map((expense) =>
       expense.category === name ? { ...expense, category: DEFAULT_CATEGORY } : expense,
     );
   });
+  saveUsers(users);
   editingCategory = null;
   renderCategoryOptions();
   renderCategoryList();

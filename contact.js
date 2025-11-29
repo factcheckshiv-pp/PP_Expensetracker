@@ -32,12 +32,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const purpose = document.getElementById("contactPurpose").value.trim();
     if (!name || !email || !phone || !purpose) return;
 
-    const subject = encodeURIComponent(`Expense Tracker Inquiry from ${name}`);
-    const body = encodeURIComponent(
-      `Name: ${name}\nEmail: ${email}\nContact: ${phone}\nPurpose:\n${purpose}`,
-    );
-    window.location.href = `mailto:primepath.shiv@gmail.com?subject=${subject}&body=${body}`;
-
     const messages = loadMessages();
     messages.push({
       id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
@@ -50,6 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
     saveMessages(messages);
 
     contactForm.reset();
+    alert("Thank you for your message! We'll get back to you soon.");
   });
 });
 
